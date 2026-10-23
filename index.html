@@ -202,8 +202,16 @@ input[type=date]{max-width:220px}
 
 /* Medições */
 .vit{border:1px solid var(--line); border-radius:10px; padding:0 12px; margin:0 0 18px; background:var(--surface-2)}
-.vit > summary{cursor:pointer; font-weight:700; padding:11px 0; font-size:.95rem}
+.vit > summary{cursor:pointer; font-weight:700; padding:12px 0; font-size:.95rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap; list-style:none; min-height:48px}
+.vit > summary::-webkit-details-marker{display:none}
+.vit > summary::before{content:"+"; display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:var(--accent); color:var(--accent-ink); font-size:1rem; line-height:1; flex:0 0 auto}
+.vit[open] > summary::before{content:"−"}
 .vit[open] > summary{border-bottom:1px solid var(--line); margin-bottom:12px}
+.vit .sub-s{font-weight:400; color:var(--muted); font-size:.85rem; text-transform:none; letter-spacing:0}
+.vit .cnt{margin-left:auto; font-size:.78rem; text-transform:none; letter-spacing:0; background:var(--ok); color:#fff; border-radius:999px; padding:1px 9px}
+.vit .cnt:empty{display:none}
+/* Títulos das partes dos formulários em letras maiúsculas */
+.card legend,.vit > summary{text-transform:uppercase; letter-spacing:.05em}
 .vgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:4px 12px}
 .vgrid .field{margin-bottom:12px}
 .vgrid input,.vgrid select{background:var(--surface)}
@@ -321,6 +329,14 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
 .checks label{display:flex; gap:7px; align-items:center; min-height:36px; font-size:.95rem}
 .checks input{width:18px; height:18px; accent-color:var(--accent)}
 .ropts details{border-top:1px solid var(--line); padding-top:8px}
+.rkind{display:flex; gap:4px; background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:4px; margin-bottom:12px}
+.rkind button{flex:1; font:inherit; font-weight:700; border:0; background:none; color:var(--muted); padding:10px 6px; border-radius:9px; cursor:pointer; min-height:44px; text-transform:uppercase; letter-spacing:.04em; font-size:.88rem}
+.rkind button[aria-selected="true"]{background:var(--accent); color:var(--accent-ink)}
+#reportView[data-kind=med] [data-k=psi],#reportView[data-kind=psi] [data-k=med]{display:none}
+.prof-row{display:flex; gap:8px; align-items:center}
+.prof-row select,.prof-row input{flex:1; min-width:0}
+.prof-row .btn{flex:0 0 auto; white-space:nowrap}
+.r-msg{border-left:3px solid #1F6E8C; background:#f4f8fa; padding:8px 12px; margin:8px 0 0; white-space:pre-wrap}
 .ropts summary{cursor:pointer; font-weight:700; padding:6px 0}
 .paper{background:#fff; color:#161616; border-radius:4px; box-shadow:0 1px 4px rgba(0,0,0,.18); padding:28px 30px; font-size:14px; line-height:1.45; color-scheme:light; -webkit-print-color-adjust:exact; print-color-adjust:exact}
 .paper h1{font-size:22px; margin:0}
@@ -363,7 +379,7 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
   :root:root:root{--bg:#fff; --surface:#fff; --surface-2:#fff; --ink:#000; --muted:#444; --line:#bbb; --accent:#1F6E8C; padding:0; color-scheme:light}
   body{background:#fff}
   body.report-open::before{display:none}
-  .top .hbtns,.top > button,.banner,.tabs,#stripSec,#formCard,#examCard,#rxCard,#apCard,#todayCard,#search,#xSearch,#vActions,footer,.entry-head .acts,#toast,dialog,.rbar,.ropts{display:none!important}
+  .top .hbtns,.top > button,.banner,.tabs,.rkind,#stripSec,#formCard,#examCard,#rxCard,#apCard,#todayCard,#search,#xSearch,#vActions,footer,.entry-head .acts,#toast,dialog,.rbar,.ropts{display:none!important}
   .entry{break-inside:avoid}
   .rwrap{padding:0; max-width:none}
   .paper{box-shadow:none; border-radius:0; padding:0; font-size:10.5pt}
@@ -381,7 +397,7 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
       <h1>Diário de sintomas</h1>
       <p class="sub" id="summary">Carregando…</p>
     </div>
-    <span class="hbtns"><button class="btn primary" id="btnReport" type="button">Relatório</button><button class="btn" id="btnProfile" type="button">Meu perfil</button><button class="btn" id="btnData" type="button">Backup e dados</button><button class="btn" id="btnTheme" type="button" aria-label="Aparência: tema e cores">Aparência</button></span>
+    <span class="hbtns"><button class="btn primary" id="btnReport" type="button">Relatório médico</button><button class="btn primary" id="btnReportPsi" type="button">Relatório psicológico</button><button class="btn" id="btnProfile" type="button">Meu perfil</button><button class="btn" id="btnData" type="button">Backup e dados</button><button class="btn" id="btnTheme" type="button" aria-label="Aparência: tema e cores">Aparência</button></span>
   </header>
 
   <div class="banner" id="installBanner" hidden>
@@ -445,22 +461,22 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
       <div id="medList"></div>
     </fieldset>
 
-    <fieldset class="box">
-      <legend>Como você está hoje</legend>
+    <details class="vit" id="marksBox">
+      <summary>Como você está hoje <span class="sub-s">humor, sono, disposição…</span><span class="cnt" id="marksCnt"></span></summary>
       <div id="marks"></div>
       <div class="mark"><span class="mlbl" id="lgEvents">Aconteceu hoje</span><div class="chips" id="events" aria-labelledby="lgEvents"></div></div>
-    </fieldset>
+    </details>
 
-    <fieldset class="box" id="mensBox" hidden>
-      <legend>Menstruação</legend>
+    <details class="vit" id="mensBox" hidden>
+      <summary>Menstruação <span class="sub-s">fluxo, início, sinais</span><span class="cnt" id="mensCnt"></span></summary>
       <div class="mens-info" id="mensInfo"></div>
       <div class="mark"><span class="mlbl" id="lgFlow">Fluxo neste dia</span><div class="chips" id="mensFlow" aria-labelledby="lgFlow"></div></div>
       <div class="mark"><span class="mlbl" id="lgEdge">Marcar</span><div class="chips" id="mensEdge" aria-labelledby="lgEdge"></div></div>
-      <div class="mark" style="margin-bottom:0"><span class="mlbl" id="lgSigns">Sinais</span><div class="chips" id="mensSigns" aria-labelledby="lgSigns"></div></div>
-    </fieldset>
+      <div class="mark"><span class="mlbl" id="lgSigns">Sinais</span><div class="chips" id="mensSigns" aria-labelledby="lgSigns"></div></div>
+    </details>
 
     <details class="vit" id="vitBox">
-      <summary>Medições: pressão, peso, glicemia…</summary>
+      <summary>Medições <span class="sub-s">pressão, peso, glicemia…</span><span class="cnt" id="vitCnt"></span></summary>
       <div class="vgrid">
         <div class="field"><span id="lblBp">Pressão <span class="unit">mmHg</span></span>
           <span class="bp"><input type="text" id="vSys" inputmode="numeric" placeholder="120" aria-label="Pressão sistólica (máxima)" aria-describedby="lblBp"> <span aria-hidden="true">/</span> <input type="text" id="vDia" inputmode="numeric" placeholder="80" aria-label="Pressão diastólica (mínima)"></span>
@@ -516,7 +532,7 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
       <p class="hint">Cadastre a receita e os remédios que precisa tomar, marcando manhã, tarde ou noite e o horário. Eles aparecem em “Hoje”, no diário, com o botão “Tomei”, e geram avisos.</p>
       <div class="grid2">
         <label class="field"><span>Data da receita</span><input type="date" id="rxDate"></label>
-        <label class="field"><span>Médico(a)</span><input type="text" id="rxDoctor" list="dlDoctors" placeholder="Opcional"></label>
+        <div class="field"><span>Médico(a)</span><div class="prof-row"><input type="text" id="rxDoctor" list="dlDoctors" placeholder="Escolha ou digite (opcional)" aria-label="Médico(a)"><button class="btn small" type="button" data-new-doctor="#rxDoctor">+ Novo</button></div></div>
       </div>
       <fieldset>
         <legend>Remédios da receita</legend>
@@ -557,7 +573,7 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
       <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
         <label class="field"><span>Data da consulta</span><input type="date" id="apDate"></label>
         <label class="field"><span>Horário</span><input type="time" id="apTime"></label>
-        <label class="field"><span>Médico(a) ou profissional</span><input type="text" id="apWho" list="dlDoctors" placeholder="Escolha ou digite o nome"></label>
+        <div class="field"><span>Médico(a) ou profissional</span><div class="prof-row"><input type="text" id="apWho" list="dlDoctors" placeholder="Escolha ou digite o nome" aria-label="Médico(a) ou profissional"><button class="btn small" type="button" data-new-doctor="#apWho">+ Novo</button></div></div>
         <label class="field"><span>Especialidade</span><input type="text" id="apSpec" list="dlSpec" placeholder="Ex.: cardiologista, psicólogo(a)"></label>
       </div>
       <label class="field"><span>Local</span><input type="text" id="apPlace" list="dlApPlace" placeholder="Clínica, hospital, endereço (opcional)"></label>
@@ -618,7 +634,7 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
       <div class="field"><span id="lgXStatus">Resultado geral</span><div class="chips" id="xStatus" aria-labelledby="lgXStatus"></div></div>
       <div class="grid2">
         <label class="field"><span>Laboratório ou local</span><input type="text" id="xPlace" list="dlPlace" placeholder="Opcional"></label>
-        <label class="field"><span>Pedido por</span><input type="text" id="xDoctor" list="dlDoctors" placeholder="Médico(a), opcional"></label>
+        <div class="field"><span>Pedido por</span><div class="prof-row"><input type="text" id="xDoctor" list="dlDoctors" placeholder="Médico(a), opcional" aria-label="Pedido por"><button class="btn small" type="button" data-new-doctor="#xDoctor">+ Novo</button></div></div>
       </div>
       <label class="field"><span>Resultado ou valores principais <span class="unit">(opcional)</span></span>
         <textarea id="xResult" rows="3" placeholder="Ex.: Hemoglobina 13,5 g/dL; Colesterol total 190 mg/dL; laudo normal"></textarea>
@@ -653,18 +669,24 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
 </div>
 
 
-<div id="reportView" hidden>
+<div id="reportView" data-kind="med" hidden>
   <div class="rbar">
     <button class="btn" type="button" id="rBack">Voltar</button>
     <strong class="rbar-title" id="rTitle">Relatório para o médico</strong>
     <button class="btn primary" type="button" id="rPrint">Imprimir ou salvar PDF</button>
   </div>
   <div class="rwrap">
+    <div class="rkind" role="tablist" aria-label="Tipo de relatório">
+      <button type="button" role="tab" data-kind="med" aria-selected="true">Para médicos</button>
+      <button type="button" role="tab" data-kind="psi" aria-selected="false">Para psicólogo(a)</button>
+    </div>
+    <input type="hidden" id="rFor" value="med">
     <div class="ropts">
+      <p class="hint" id="rKindHint"></p>
       <div class="grid">
-        <label class="field"><span>Relatório para</span>
-          <select id="rFor"><option value="med">Médico(a)</option><option value="psi">Psicólogo(a)</option></select>
-        </label>
+        <div class="field"><span id="lgProf">Para quem <span class="unit">(opcional)</span></span>
+          <div class="prof-row"><select id="rProf" aria-labelledby="lgProf"></select><button class="btn small" type="button" data-new-doctor="#rProf">+ Novo</button></div>
+        </div>
         <label class="field"><span>Período</span>
           <select id="rPeriod">
             <option value="7">Últimos 7 dias</option>
@@ -679,22 +701,29 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
         <label class="field" data-custom hidden><span>De</span><input type="date" id="rFrom"></label>
         <label class="field" data-custom hidden><span>Até</span><input type="date" id="rTo"></label>
       </div>
+      <p class="mlbl" style="font-weight:700; margin:12px 0 0">O que entra no relatório</p>
       <div class="checks">
-        <label><input type="checkbox" id="rVitals" checked> Medições</label>
-        <label><input type="checkbox" id="rExams" checked> Exames</label>
+        <label data-k="psi"><input type="checkbox" id="rMood" checked> Gráficos de humor, sono e disposição</label>
+        <label data-k="med"><input type="checkbox" id="rVitals" checked> Medições</label>
+        <label data-k="med"><input type="checkbox" id="rExams" checked> Exames</label>
         <label><input type="checkbox" id="rMarks" checked> Bem-estar e ocorrências</label>
+        <label data-k="psi"><input type="checkbox" id="rPhys" checked> Sintomas físicos</label>
+        <label data-k="psi"><input type="checkbox" id="rMeds" checked> Remédios</label>
         <label><input type="checkbox" id="rAppts" checked> Consultas</label>
         <label id="rCycleLbl" hidden><input type="checkbox" id="rCycle" checked> Ciclo menstrual</label>
         <label id="rAILbl" hidden><input type="checkbox" id="rAI" checked> Análise por IA</label>
         <label><input type="checkbox" id="rDaily" checked> Registro dia a dia</label>
         <label><input type="checkbox" id="rNotes" checked> Observações</label>
-        <label><input type="checkbox" id="rPhotos" checked> Fotos</label>
-        <label><input type="checkbox" id="rFiles" checked> Lista de anexos</label>
+        <label data-k="med"><input type="checkbox" id="rPhotos" checked> Fotos</label>
+        <label data-k="med"><input type="checkbox" id="rFiles" checked> Lista de anexos</label>
       </div>
+      <label class="field" style="margin:8px 0 6px"><span id="rMsgLbl">Recado para o profissional <span class="unit">(opcional, entra no relatório)</span></span>
+        <textarea id="rMsg" rows="2"></textarea>
+      </label>
       <p class="muted" style="font-size:.88rem; margin:4px 0 8px">Os dados do paciente vêm de “Meu perfil”. <button class="btn link" type="button" id="rEditProfile">Editar perfil</button></p>
       <details id="aiBox">
         <summary>Análise por IA (opcional)</summary>
-        <p class="hint" style="margin-top:6px">Uma inteligência artificial (Claude, da Anthropic) lê os registros deste período e escreve um resumo organizado para você levar ao médico. Só é enviado quando você tocar em “Gerar análise”. Nome, data de nascimento, fotos e arquivos <strong>não</strong> são enviados. A análise não é diagnóstico.</p>
+        <p class="hint" style="margin-top:6px">Uma inteligência artificial (Claude, da Anthropic) lê os registros deste período e escreve um resumo organizado para você levar ao profissional. Só é enviado quando você tocar em “Gerar análise”. Nome, data de nascimento, fotos e arquivos <strong>não</strong> são enviados. A análise não é diagnóstico.</p>
         <div class="mark"><span class="mlbl" id="lgAiFocus">O que a análise deve trazer</span><div class="chips" id="aiFocus" aria-labelledby="lgAiFocus"></div></div>
         <div class="mark"><span class="mlbl" id="lgAiStyle">Linguagem</span><div class="chips" id="aiStyle" aria-labelledby="lgAiStyle"></div></div>
         <label class="check"><input type="checkbox" id="aiNotes"><span>Enviar também as observações escritas</span></label>
@@ -715,6 +744,20 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
 <datalist id="dlDoctors"></datalist>
 <datalist id="dlSpec"></datalist>
 <datalist id="dlApPlace"></datalist>
+
+<dialog id="dlgDoctor" aria-labelledby="dlgDoctorTitle">
+  <div class="dlg-head">
+    <h2 id="dlgDoctorTitle">Novo médico ou profissional</h2>
+    <button class="x" type="button" data-close aria-label="Fechar">×</button>
+  </div>
+  <div class="dlg-body">
+    <label class="field"><span>Nome</span><input type="text" id="ndName" placeholder="Ex.: Dra. Ana Souza"></label>
+    <label class="field"><span>Especialidade</span><input type="text" id="ndSpec" list="dlSpec" placeholder="Escolha ou digite"></label>
+    <label class="field"><span>Telefone <span class="unit">(opcional)</span></span><input type="text" id="ndPhone" inputmode="tel"></label>
+    <p class="hint">Fica salvo em “Meu perfil”, junto com os outros, e aparece nas consultas, receitas, exames e relatórios.</p>
+    <div class="actions"><button class="btn primary" type="button" id="ndSave">Salvar profissional</button><button class="btn" type="button" data-close>Cancelar</button></div>
+  </div>
+</dialog>
 
 <dialog id="dlgSync" aria-labelledby="dlgSyncTitle">
   <div class="dlg-head">
@@ -833,7 +876,8 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
     <div class="mark"><span class="mlbl" id="lgMob">Mobilidade e apoio</span><div class="chips" id="p_mobility" aria-labelledby="lgMob"></div></div>
     <div class="field"><span>Médicos e profissionais que acompanham</span>
       <div id="p_doctors"></div>
-      <button type="button" class="btn small add-row" id="p_addDoctor">Adicionar médico ou profissional</button>
+      <p class="hint" style="margin:6px 0 0">Cadastre quantos precisar, cada um com a sua especialidade (clínico, cardiologista, psicóloga…).</p>
+      <button type="button" class="btn small add-row" id="p_addDoctor">+ Adicionar outro médico ou profissional</button>
     </div>
     <label class="field"><span>Contato de emergência</span><input type="text" id="p_emergency" placeholder="Nome e telefone"></label>
     <div class="actions"><button class="btn primary" type="button" data-close>Pronto</button></div>
@@ -1288,6 +1332,7 @@ function fillVitals(v) {
   $('#vGluCtx').value = v?.glucoseCtx || '';
   $('#vTime').value = v?.time || '';
   $('#vitBox').open = !!v;
+  updateFormCounts();
 }
 // Lista legível das medições: [rótulo, valor]
 function vitalsList(v) {
@@ -1331,6 +1376,19 @@ function fillDayMarks(e) {
   flowGroup.set(e?.mens?.flow || '');
   edgeGroup.set(e?.mens ? [e.mens.start && 'start', e.mens.end && 'end'].filter(Boolean) : []);
   signGroup.set(e?.mens?.signs || []);
+  // Partes que abrem e fecham: ficam abertas só quando já têm algo marcado.
+  $('#marksBox').open = !!(e?.marks || e?.events?.length);
+  $('#mensBox').open = !!e?.mens;
+  updateFormCounts();
+}
+// Quantas respostas há em cada parte que abre e fecha do formulário.
+function updateFormCounts() {
+  const {marks, events, mens} = readDayMarks();
+  const n = Object.keys(marks || {}).length + events.length;
+  $('#marksCnt').textContent = n ? `${n} ${n === 1 ? 'marcado' : 'marcados'}` : '';
+  $('#mensCnt').textContent = mens ? 'marcado' : '';
+  const v = VITAL_INPUTS.filter(([, sel]) => $(sel).value.trim()).length;
+  $('#vitCnt').textContent = v ? `${v} ${v === 1 ? 'valor' : 'valores'}` : '';
 }
 // Junta os dias com menstruação em períodos {from, last, ended, flow, signs}.
 function mensPeriods(skipId) {
@@ -1905,6 +1963,7 @@ async function saveRx() {
     const {newFiles, removed, meta} = await rxFiles.collect(id, old?.files || []);
     const rx = {id, date, doctor: $('#rxDoctor').value.trim(), meds, notes: $('#rxNotes').value.trim(), files: meta, createdAt: old?.createdAt || now, updatedAt: now};
     await writeTx((es, fs, xs, rs) => { rs.put(rx); newFiles.forEach(f => fs.put(f)); removed.forEach(fid => fs.delete(fid)); });
+    await rememberDoctor(rx.doctor);
     removed.forEach(dropUrl);
     toast(editingRxId ? 'Receita atualizada.' : 'Receita salva. Os horários aparecem em “Hoje”, no diário.');
     resetRxForm();
@@ -2013,6 +2072,7 @@ async function saveAp() {
       place: $('#apPlace').value.trim(), notes: $('#apNotes').value.trim(), alertDays, alertTime: $('#apAlert').value || '09:00',
       createdAt: old?.createdAt || now, updatedAt: now, gId: old?.gId, gSyncedAt: old?.gSyncedAt};
     await writeTx((es, fs, xs, rs, as) => as.put(ap));
+    await rememberDoctor(ap.who, ap.spec);
     toast(editingApId ? 'Consulta atualizada.' : alertDays >= 0 ? `Consulta salva. Os avisos começam ${alertDays ? alertDays + (alertDays === 1 ? ' dia' : ' dias') + ' antes' : 'no dia'}, às ${ap.alertTime}.` : 'Consulta salva.');
     resetApForm();
     await reload();
@@ -2694,7 +2754,8 @@ async function wipeAll() {
   await setMeta('gsync', null);
   gsync = {}; gForgetToken();
   analysis = null;
-  try { localStorage.removeItem('diario-ia-chave'); } catch {}
+  try { localStorage.removeItem('diario-ia-chave'); localStorage.removeItem('diario-relatorio-opcoes'); } catch {}
+  reportOpts = {};
   [...urlCache.keys()].forEach(dropUrl);
   resetForm(); resetExamForm(); resetRxForm(); resetApForm(); $('#dlgData').close();
   toast('Todos os dados foram apagados.');
@@ -2723,6 +2784,37 @@ function addDoctorRow(d = {}) {
   row.querySelector('.x').addEventListener('click', () => { row.remove(); profileChanged(); });
   $('#p_doctors').appendChild(row);
   return row;
+}
+// Nome novo usado numa consulta ou receita entra na lista de profissionais do perfil.
+async function rememberDoctor(name, spec = '') {
+  if (!name || doctorsOf(profile).some(d => norm(d.name) === norm(name))) return false;
+  profile = {...profile, doctors: [...doctorsOf(profile), {name, spec, phone: ''}]};
+  await saveProfile(profile);
+  return true;
+}
+// Janela "+ Novo": cadastra o profissional e já preenche o campo de onde veio.
+let ndTarget = null;
+function openNewDoctor(target) {
+  ndTarget = target;
+  ['#ndName', '#ndSpec', '#ndPhone'].forEach(s => $(s).value = '');
+  $('#dlgDoctor').showModal();
+  $('#ndName').focus();
+}
+async function saveNewDoctor() {
+  const d = {name: $('#ndName').value.trim(), spec: $('#ndSpec').value.trim(), phone: $('#ndPhone').value.trim()};
+  if (!d.name && !d.spec) return toast('Escreva o nome ou a especialidade.', true);
+  const docs = doctorsOf(profile);
+  profile = {...profile, doctors: docs.some(x => norm(x.name) === norm(d.name) && d.name) ? docs.map(x => norm(x.name) === norm(d.name) ? {...x, ...d} : x) : [...docs, d]};
+  try { await saveProfile(profile); } catch (err) { return saveError(err); }
+  renderSuggestions();
+  const t = ndTarget && $(ndTarget);
+  if (t?.tagName === 'SELECT') { fillProfOptions($('#rFor').value, doctorText(d)); saveReportOpts(); buildReport(); }
+  else if (t) {
+    t.value = d.name || d.spec;
+    if (ndTarget === '#apWho' && d.spec && !$('#apSpec').value.trim()) $('#apSpec').value = d.spec;
+  }
+  $('#dlgDoctor').close();
+  toast('Profissional salvo no perfil.');
 }
 const readDoctors = () => $$('#p_doctors .doc').map(r => ({name: r.querySelector('.d-name').value.trim(), spec: r.querySelector('.d-spec').value.trim(), phone: r.querySelector('.d-phone').value.trim()}))
   .filter(d => d.name || d.spec || d.phone);
@@ -2770,6 +2862,8 @@ function bindProfile() {
   mobGroup = chipGroup($('#p_mobility'), MOBILITY, {multi: true, onChange: profileChanged});
   [...PROFILE_FIELDS.map(k => '#p_' + k), '#p_cycle'].forEach(id => $(id).addEventListener(id === '#p_blood' || id === '#p_cycle' || id === '#p_birth' ? 'change' : 'input', profileChanged));
   $('#p_addDoctor').addEventListener('click', () => addDoctorRow().querySelector('.d-name').focus());
+  $$('[data-new-doctor]').forEach(b => b.addEventListener('click', () => openNewDoctor(b.dataset.newDoctor)));
+  $('#ndSave').addEventListener('click', saveNewDoctor);
   $('#dlgProfile').addEventListener('close', renderSuggestions);
   $('#btnProfile').addEventListener('click', openProfile);
   $('#btnProfileNow').addEventListener('click', openProfile);
@@ -2843,10 +2937,13 @@ async function buildReport() {
   if (!pr) { doc.innerHTML = '<p class="r-empty">Escolha as datas inicial e final.</p>'; return; }
   const {from, to} = pr;
   const prof = profile;
-  const inc = {vitals: $('#rVitals').checked, exams: $('#rExams').checked, daily: $('#rDaily').checked, notes: $('#rNotes').checked, photos: $('#rPhotos').checked, files: $('#rFiles').checked,
-    marks: $('#rMarks').checked, cycle: $('#rCycle').checked, ai: $('#rAI').checked, appts: $('#rAppts').checked};
   const psi = $('#rFor').value === 'psi';
-  $('#rTitle').textContent = psi ? 'Relatório para o(a) psicólogo(a)' : 'Relatório para o médico';
+  // Opção marcada e que faz parte deste tipo de relatório.
+  const on = id => { const el = $('#' + id), k = el.closest('label').dataset.k; return el.checked && (!k || k === (psi ? 'psi' : 'med')); };
+  const inc = {vitals: on('rVitals'), exams: on('rExams'), daily: on('rDaily'), notes: on('rNotes'), photos: on('rPhotos'), files: on('rFiles'),
+    marks: on('rMarks'), cycle: on('rCycle'), ai: on('rAI'), appts: on('rAppts'), mood: on('rMood'), phys: on('rPhys'), meds: on('rMeds')};
+  $('#rTitle').textContent = REPORT_KINDS[psi ? 'psi' : 'med'].title;
+  const forWho = $('#rProf').value, msg = $('#rMsg').value.trim();
   const periods = mensPeriods().filter(p => p.last >= from && p.from <= to);
   $('#rCycleLbl').hidden = !periods.length;
   const ai = analysis && analysis.from === from && analysis.to === to ? analysis : null;
@@ -2881,7 +2978,7 @@ async function buildReport() {
   const generated = new Date();
   let h = `<header class="r-head">
     <div><h1>${psi ? 'Relatório para acompanhamento psicológico' : 'Relatório de sintomas'}</h1>
-    <p>Período: ${brDate(from)} a ${brDate(to)} (${total} ${total === 1 ? 'dia' : 'dias'})</p></div>
+    <p>Período: ${brDate(from)} a ${brDate(to)} (${total} ${total === 1 ? 'dia' : 'dias'})</p>${forWho ? `<p>Para: <strong>${esc(forWho)}</strong></p>` : ''}</div>
     <div class="r-gen">Gerado em ${generated.toLocaleDateString('pt-BR')} às ${fmtTime(generated)}</div>
   </header>`;
 
@@ -2908,6 +3005,7 @@ async function buildReport() {
 
   // Cada seção vai para S; a ordem muda conforme o relatório é para o médico ou para o(a) psicólogo(a).
   const S = {};
+  if (msg) S.msg = `<h2>Recado do paciente</h2><p class="r-msg">${esc(msg)}</p>`;
   S.summary = `<h2>Resumo do período</h2><dl class="r-dl">
     <div><dt>Dias com registro</dt><dd>${recDays.length} de ${total}</dd></div>
     <div><dt>Total de registros</dt><dd>${list.length}</dd></div>
@@ -2992,8 +3090,8 @@ async function buildReport() {
         <td>${esc(a.place) || '—'}</td><td style="white-space:pre-wrap">${esc(a.notes) || '—'}</td></tr>`).join('') + `</tbody></table></div>`;
   }
 
-  if (inc.marks) {
-    if (psi) {
+  if (inc.marks || inc.mood) {
+    if (psi && inc.mood) {
       // Humor, sono e disposição viram uma linha no tempo (mais alto é melhor).
       let mc = '';
       ['mood', 'sleep', 'energy'].forEach(k => {
@@ -3071,9 +3169,13 @@ async function buildReport() {
       `</tbody></table></div><p class="r-note">Os arquivos originais (exames, receitas) estão no aparelho do paciente e podem ser mostrados no app.</p>`;
   }
 
+  // Seções desmarcadas nas opções deste tipo de relatório.
+  if (!inc.marks) { delete S.marks; delete S.events; }
+  if (psi && !inc.meds) delete S.med;
+  if (psi && !inc.phys) delete S.symOther;
   const order = psi
-    ? ['summary', 'mood', 'marks', 'sym', 'events', 'med', 'appts', 'symOther', 'cycle', 'daily', 'ai', 'vitals', 'exams', 'photos', 'files']
-    : ['summary', 'chart', 'sym', 'med', 'vitals', 'exams', 'appts', 'marks', 'events', 'cycle', 'daily', 'ai', 'photos', 'files'];
+    ? ['summary', 'msg', 'mood', 'marks', 'sym', 'events', 'med', 'appts', 'symOther', 'cycle', 'daily', 'ai', 'vitals', 'exams', 'photos', 'files']
+    : ['summary', 'msg', 'chart', 'sym', 'med', 'vitals', 'exams', 'appts', 'marks', 'events', 'cycle', 'daily', 'ai', 'photos', 'files'];
   h += order.map(k => S[k] || '').join('');
 
   doc.innerHTML = h + footHTML();
@@ -3097,12 +3199,45 @@ function footHTML() {
 let reportTimer;
 const scheduleReport = () => { clearTimeout(reportTimer); reportTimer = setTimeout(buildReport, 200); };
 let savedTitle = document.title;
-async function openReport() {
+/* Tipos de relatório: cada um tem as suas opções, guardadas separadas neste aparelho. */
+const REPORT_KINDS = {
+  med: {title: 'Relatório para o médico', who: 'Recado para o(a) médico(a) ', prof: d => !/psic/.test(norm(d.spec)),
+    hint: 'Para clínico, cardiologista e os demais médicos: sintomas, remédios, medições, exames e consultas.', msg: 'Ex.: o que mais me preocupa, dúvidas sobre os remédios…'},
+  psi: {title: 'Relatório para o(a) psicólogo(a)', who: 'Recado para o(a) psicólogo(a) ', prof: d => /psic/.test(norm(d.spec)),
+    hint: 'Para o acompanhamento psicológico: humor, sono, disposição, sintomas emocionais, acontecimentos e observações.', msg: 'Ex.: como me senti, o que quero conversar na sessão…'}
+};
+const R_CHECKS = ['rMood', 'rVitals', 'rExams', 'rMarks', 'rPhys', 'rMeds', 'rAppts', 'rCycle', 'rAI', 'rDaily', 'rNotes', 'rPhotos', 'rFiles'];
+let reportOpts = {};
+try { reportOpts = JSON.parse(localStorage.getItem('diario-relatorio-opcoes')) || {}; } catch {}
+function saveReportOpts() {
+  reportOpts[$('#rFor').value] = {checks: Object.fromEntries(R_CHECKS.map(id => [id, $('#' + id).checked])), prof: $('#rProf').value, msg: $('#rMsg').value};
+  try { localStorage.setItem('diario-relatorio-opcoes', JSON.stringify(reportOpts)); } catch {}
+}
+// Profissionais do perfil, primeiro os do tipo do relatório (psicólogos ou médicos).
+function fillProfOptions(kind, sel) {
+  const docs = doctorsOf(profile).filter(d => d.name || d.spec), fit = docs.filter(REPORT_KINDS[kind].prof);
+  $('#rProf').innerHTML = '<option value="">Não informar</option>' + [...fit, ...docs.filter(d => !fit.includes(d))].map(d => `<option>${esc(doctorText(d))}</option>`).join('');
+  const vals = [...$('#rProf').options].map(o => o.value);
+  $('#rProf').value = vals.includes(sel) ? sel : fit.length === 1 && sel == null ? doctorText(fit[0]) : '';
+}
+function setReportKind(kind) {
+  $('#rFor').value = kind;
+  $('#reportView').dataset.kind = kind;
+  $$('.rkind [data-kind]').forEach(b => b.setAttribute('aria-selected', String(b.dataset.kind === kind)));
+  const o = reportOpts[kind] || {}, K = REPORT_KINDS[kind];
+  R_CHECKS.forEach(id => $('#' + id).checked = o.checks?.[id] ?? true);
+  $('#rMsg').value = o.msg || ''; $('#rMsg').placeholder = K.msg;
+  $('#rMsgLbl').firstChild.textContent = K.who;
+  $('#rKindHint').textContent = K.hint;
+  fillProfOptions(kind, o.prof);
+  aiFocusGroup.set(aiDefaultFocus());
+}
+async function openReport(kind = 'med') {
   if (!db) return toast('O armazenamento local não está disponível.', true);
+  setReportKind(kind);
   analysis = await getMeta('analysis');
   if (!$('#rFrom').value) { $('#rFrom').value = addDays(isoLocal(), -29); $('#rTo').value = isoLocal(); }
   try { $('#aiKey').value = localStorage.getItem('diario-ia-chave') || ''; } catch {}
-  aiFocusGroup.set(aiDefaultFocus());
   $('#aiConsent').checked = false;
   aiStatus('');
   document.body.classList.add('report-open');
@@ -3113,6 +3248,7 @@ async function openReport() {
 }
 function closeReport(fromPop) {
   if ($('#reportView').hidden) return;
+  saveReportOpts();
   document.body.classList.remove('report-open');
   $('#reportView').hidden = true;
   document.title = savedTitle;
@@ -3300,7 +3436,12 @@ async function copyForAI() {
 }
 
 function bindReport() {
-  $('#btnReport').addEventListener('click', openReport);
+  $('#btnReport').addEventListener('click', () => openReport('med'));
+  $('#btnReportPsi').addEventListener('click', () => openReport('psi'));
+  $$('.rkind [data-kind]').forEach(b => b.addEventListener('click', () => {
+    if (b.dataset.kind === $('#rFor').value) return;
+    saveReportOpts(); setReportKind(b.dataset.kind); buildReport();
+  }));
   $('#rBack').addEventListener('click', () => closeReport(false));
   $('#rPrint').addEventListener('click', printReport);
   $('#rEditProfile').addEventListener('click', openProfile);
@@ -3310,14 +3451,9 @@ function bindReport() {
     $$('[data-custom]').forEach(el => el.hidden = !custom);
     buildReport();
   });
-  ['#rFrom', '#rTo', '#rVitals', '#rExams', '#rMarks', '#rAppts', '#rCycle', '#rAI', '#rDaily', '#rNotes', '#rPhotos', '#rFiles'].forEach(id => $(id).addEventListener('change', buildReport));
-  // Para o(a) psicólogo(a), começa sem medições, exames e fotos (dá para marcar de novo).
-  $('#rFor').addEventListener('change', () => {
-    const med = !reportForPsi();
-    ['#rVitals', '#rExams', '#rPhotos', '#rFiles'].forEach(id => $(id).checked = med);
-    aiFocusGroup.set(aiDefaultFocus());
-    buildReport();
-  });
+  ['#rFrom', '#rTo'].forEach(id => $(id).addEventListener('change', buildReport));
+  [...R_CHECKS.map(id => '#' + id), '#rProf'].forEach(id => $(id).addEventListener('change', () => { saveReportOpts(); buildReport(); }));
+  $('#rMsg').addEventListener('input', () => { saveReportOpts(); scheduleReport(); });
   aiFocusGroup = chipGroup($('#aiFocus'), AI_FOCUS, {multi: true});
   aiStyleGroup = chipGroup($('#aiStyle'), AI_STYLES, {onChange: v => { if (!v) aiStyleGroup.set('simples'); }});
   aiStyleGroup.set('simples');
@@ -3332,11 +3468,12 @@ function bind() {
   bindTheme();
   bindProfile();
   $('#marks').innerHTML = MARKS.map(([k, label]) => `<div class="mark"><span class="mlbl" id="mk-${k}">${esc(label)}</span><div class="chips" id="mark-${k}" aria-labelledby="mk-${k}"></div></div>`).join('');
-  MARKS.forEach(([k, , opts]) => markGroups[k] = chipGroup($('#mark-' + k), opts));
-  eventGroup = chipGroup($('#events'), EVENTS, {multi: true});
-  flowGroup = chipGroup($('#mensFlow'), FLOWS, {onChange: onFlowChange});
-  edgeGroup = chipGroup($('#mensEdge'), MENS_EDGES, {multi: true});
-  signGroup = chipGroup($('#mensSigns'), MENS_SIGNS, {multi: true});
+  MARKS.forEach(([k, , opts]) => markGroups[k] = chipGroup($('#mark-' + k), opts, {onChange: updateFormCounts}));
+  eventGroup = chipGroup($('#events'), EVENTS, {multi: true, onChange: updateFormCounts});
+  flowGroup = chipGroup($('#mensFlow'), FLOWS, {onChange: v => { onFlowChange(v); updateFormCounts(); }});
+  edgeGroup = chipGroup($('#mensEdge'), MENS_EDGES, {multi: true, onChange: updateFormCounts});
+  signGroup = chipGroup($('#mensSigns'), MENS_SIGNS, {multi: true, onChange: updateFormCounts});
+  VITAL_INPUTS.forEach(([, sel]) => $(sel).addEventListener('input', updateFormCounts));
   xStatusGroup = chipGroup($('#xStatus'), EXAM_STATUS);
   // Sintomas e remédios: escolher na lista acrescenta uma linha abaixo; escolher de novo tira.
   symPick = chipGroup($('#symChips'), [], {multi: true, allowNew: true, tags: false, placeholder: 'Escolha ou digite o sintoma',
