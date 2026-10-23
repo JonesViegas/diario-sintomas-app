@@ -166,6 +166,8 @@ input[type=date]{max-width:220px}
 #marks{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:0 14px; clear:both}
 .box{border:1px solid var(--line); border-radius:10px; padding:12px; margin:0 0 18px; background:var(--surface-2)}
 .box > legend{float:left; width:100%; margin-bottom:10px}
+/* O título flutua; grades e listas dentro da caixa precisam começar abaixo dele, não ao lado. */
+.box > legend ~ *{clear:both}
 .box input[type=text],.box input[type=time],.box select{background:var(--surface)}
 
 /* Hoje, receitas, consultas e profissionais */
@@ -552,7 +554,7 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
         <h2 id="apTitle">Nova consulta</h2>
         <button class="btn link" id="apCancel" type="button" hidden>Cancelar edição</button>
       </div>
-      <div class="grid2">
+      <div class="grid2" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
         <label class="field"><span>Data da consulta</span><input type="date" id="apDate"></label>
         <label class="field"><span>Horário</span><input type="time" id="apTime"></label>
         <label class="field"><span>Médico(a) ou profissional</span><input type="text" id="apWho" list="dlDoctors" placeholder="Escolha ou digite o nome"></label>
