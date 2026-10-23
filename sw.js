@@ -1,7 +1,7 @@
 /* Service worker do Diário de sintomas.
    Guarda só os arquivos do app para funcionar sem internet.
    Os dados do paciente ficam no IndexedDB e nunca passam por aqui. */
-const VERSION = 'v4';
+const VERSION = 'v6';
 const CACHE = 'diario-sintomas-' + VERSION;
 const SHELL = [
   './',
@@ -29,6 +29,17 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('message', e => {
   if (e.data === 'skipWaiting') self.skipWaiting();
+});
+
+// Tocar num aviso abre o app (ou traz para a frente) e leva para a tela certa.
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const act = e.notification.data?.act || '';
+  e.waitUntil(self.clients.matchAll({type: 'window', includeUncontrolled: true}).then(list => {
+    const c = list[0];
+    if (c) { c.postMessage({act}); return c.focus(); }
+    return self.clients.openWindow('./' + (act ? '?acao=' + encodeURIComponent(act) : ''));
+  }));
 });
 
 self.addEventListener('fetch', e => {
