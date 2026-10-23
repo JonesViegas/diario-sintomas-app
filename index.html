@@ -221,6 +221,11 @@ input[type=date]{max-width:220px}
 .vits{list-style:none; margin:0 0 10px; padding:0; display:flex; flex-wrap:wrap; gap:6px}
 .vits li{background:var(--surface-2); border:1px solid var(--line); border-radius:8px; padding:4px 10px; font-size:.9rem}
 .vits li span{color:var(--muted); font-size:.8rem; margin-right:4px}
+.vblock{border:1px solid var(--line); border-radius:10px; padding:10px 12px 0; margin-bottom:12px; background:var(--surface-2)}
+.vblock .vb-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:8px}
+.vblock .vb-head strong{text-transform:uppercase; letter-spacing:.05em; font-size:.9rem}
+.tbl .acts{white-space:nowrap}
+.tbl .acts .btn{margin-right:10px}
 .vcards{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:18px}
 .vcard{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px}
 .vcard .vl{font-size:.82rem; color:var(--muted)}
@@ -308,6 +313,7 @@ dialog::backdrop{background:rgba(10,15,20,.55)}
 #toast.show{opacity:1}
 #toast.err{background:var(--danger); color:#fff}
 footer{font-size:.85rem; color:var(--muted); border-top:1px solid var(--line); padding-top:14px}
+footer .copy{margin:14px 0 0; text-align:center; font-weight:700; color:var(--ink)}
 @media (prefers-reduced-motion:reduce){ #toast{transition:none} }
 
 .banner{display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; background:var(--surface); border:1px solid var(--accent); border-left-width:4px; border-radius:10px; padding:12px 14px; margin-bottom:20px; font-size:.95rem}
@@ -379,7 +385,7 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
   :root:root:root{--bg:#fff; --surface:#fff; --surface-2:#fff; --ink:#000; --muted:#444; --line:#bbb; --accent:#1F6E8C; padding:0; color-scheme:light}
   body{background:#fff}
   body.report-open::before{display:none}
-  .top .hbtns,.top > button,.banner,.tabs,.rkind,#stripSec,#formCard,#examCard,#rxCard,#apCard,#todayCard,#search,#xSearch,#vActions,footer,.entry-head .acts,#toast,dialog,.rbar,.ropts{display:none!important}
+  .top .hbtns,.top > button,.banner,.tabs,.rkind,#vitCard,#stripSec,#formCard,#examCard,#rxCard,#apCard,#todayCard,#search,#xSearch,#vActions,footer,.entry-head .acts,#toast,dialog,.rbar,.ropts{display:none!important}
   .entry{break-inside:avoid}
   .rwrap{padding:0; max-width:none}
   .paper{box-shadow:none; border-radius:0; padding:0; font-size:10.5pt}
@@ -446,20 +452,20 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
 
     <label class="field"><span>Data</span><input type="date" id="fDate"></label>
 
-    <fieldset>
-      <legend id="lgSym">Sintomas</legend>
+    <details class="vit" id="symBox">
+      <summary><span id="lgSym">Sintomas</span> <span class="sub-s">dores e o que sentiu, de 0 a 10</span><span class="cnt" id="symCnt"></span></summary>
       <p class="hint">Escolha na lista ou comece a digitar para buscar. Depois ajuste a intensidade de 0 a 10.</p>
       <div id="symChips" aria-labelledby="lgSym"></div>
-      <div id="symList"></div>
-    </fieldset>
+      <div id="symList" style="margin-bottom:12px"></div>
+    </details>
 
-    <fieldset>
-      <legend id="lgMed">Remédios tomados</legend>
+    <details class="vit" id="medBox">
+      <summary><span id="lgMed">Remédios tomados</span> <span class="sub-s">nome, dose e horário</span><span class="cnt" id="medCnt"></span></summary>
       <p class="hint">Escolha na lista ou digite o nome. O horário é preenchido com a hora atual.</p>
       <div id="medChips" aria-labelledby="lgMed"></div>
       <button type="button" class="btn small add-row" id="addContinuous" hidden>Tomei todos os de uso contínuo</button>
-      <div id="medList"></div>
-    </fieldset>
+      <div id="medList" style="margin-bottom:12px"></div>
+    </details>
 
     <details class="vit" id="marksBox">
       <summary>Como você está hoje <span class="sub-s">humor, sono, disposição…</span><span class="cnt" id="marksCnt"></span></summary>
@@ -479,17 +485,17 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
       <summary>Medições <span class="sub-s">pressão, peso, glicemia…</span><span class="cnt" id="vitCnt"></span></summary>
       <div class="vgrid">
         <div class="field"><span id="lblBp">Pressão <span class="unit">mmHg</span></span>
-          <span class="bp"><input type="text" id="vSys" inputmode="numeric" placeholder="120" aria-label="Pressão sistólica (máxima)" aria-describedby="lblBp"> <span aria-hidden="true">/</span> <input type="text" id="vDia" inputmode="numeric" placeholder="80" aria-label="Pressão diastólica (mínima)"></span>
+          <span class="bp"><input type="text" id="vSys" data-v="sys" inputmode="numeric" placeholder="120" aria-label="Pressão sistólica (máxima)" aria-describedby="lblBp"> <span aria-hidden="true">/</span> <input type="text" id="vDia" data-v="dia" inputmode="numeric" placeholder="80" aria-label="Pressão diastólica (mínima)"></span>
         </div>
-        <label class="field"><span>Pulso <span class="unit">bpm</span></span><input type="text" id="vPulse" inputmode="numeric" placeholder="72"></label>
-        <label class="field"><span>Peso <span class="unit">kg</span></span><input type="text" id="vWeight" inputmode="decimal" placeholder="70,5"></label>
-        <label class="field"><span>Glicemia <span class="unit">mg/dL</span></span><input type="text" id="vGlu" inputmode="numeric" placeholder="95"></label>
+        <label class="field"><span>Pulso <span class="unit">bpm</span></span><input type="text" id="vPulse" data-v="pulse" inputmode="numeric" placeholder="72"></label>
+        <label class="field"><span>Peso <span class="unit">kg</span></span><input type="text" id="vWeight" data-v="weight" inputmode="decimal" placeholder="70,5"></label>
+        <label class="field"><span>Glicemia <span class="unit">mg/dL</span></span><input type="text" id="vGlu" data-v="glucose" inputmode="numeric" placeholder="95"></label>
         <label class="field"><span>Glicemia medida</span>
-          <select id="vGluCtx"><option value="">Não informado</option><option value="jejum">Em jejum</option><option value="pós-refeição">Após refeição</option><option value="aleatória">Ao acaso</option></select>
+          <select id="vGluCtx" data-v="glucoseCtx"><option value="">Não informado</option><option value="jejum">Em jejum</option><option value="pós-refeição">Após refeição</option><option value="aleatória">Ao acaso</option></select>
         </label>
-        <label class="field"><span>Temperatura <span class="unit">°C</span></span><input type="text" id="vTemp" inputmode="decimal" placeholder="36,5"></label>
-        <label class="field"><span>Saturação <span class="unit">% O₂</span></span><input type="text" id="vSpo2" inputmode="numeric" placeholder="98"></label>
-        <label class="field"><span>Horário da medição</span><input type="time" id="vTime"></label>
+        <label class="field"><span>Temperatura <span class="unit">°C</span></span><input type="text" id="vTemp" data-v="temp" inputmode="decimal" placeholder="36,5"></label>
+        <label class="field"><span>Saturação <span class="unit">% O₂</span></span><input type="text" id="vSpo2" data-v="spo2" inputmode="numeric" placeholder="98"></label>
+        <label class="field"><span>Horário da medição</span><input type="time" id="vTime" data-v="time"></label>
       </div>
     </details>
 
@@ -614,9 +620,19 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
           <select id="vPeriod" aria-label="Período dos gráficos" style="width:auto">
             <option value="30" selected>30 dias</option><option value="90">90 dias</option><option value="365">1 ano</option><option value="all">Tudo</option>
           </select>
-          <button class="btn primary small" type="button" id="btnNewVital">Nova medição</button>
         </span>
       </div>
+      <section class="card" id="vitCard" aria-labelledby="vitTitle" style="margin-bottom:24px">
+        <div class="row-between">
+          <h2 id="vitTitle">Nova medição</h2>
+          <button class="btn link" id="vfCancel" type="button" hidden>Cancelar edição</button>
+        </div>
+        <p class="hint" id="vfHint">Preencha só o que mediu. Mediu mais de uma vez no dia? Toque em “+ Outra medição”: cada uma fica com o seu horário.</p>
+        <label class="field"><span>Data</span><input type="date" id="vfDate"></label>
+        <div id="vfList"></div>
+        <button class="btn small" type="button" id="vfAdd">+ Outra medição</button>
+        <div class="actions" style="margin-top:14px"><button class="btn primary" type="button" id="vfSave">Salvar medição</button></div>
+      </section>
       <div id="vitalsView"></div>
     </section>
   </div>
@@ -665,6 +681,7 @@ body.report-open::before{content:""; position:fixed; inset:0 0 auto; height:env(
   <footer>
     Tudo (registros, medições, exames, perfil, tema e cores) fica guardado só neste navegador, neste aparelho. Nada é enviado para a internet, a não ser que você peça uma análise por IA no relatório ou conecte as consultas ao Google Agenda.
     Limpar os dados do navegador apaga o diário, então faça backups com frequência.
+    <p class="copy">Viegastechs © 2026 - todos os direitos reservados</p>
   </footer>
 </div>
 
@@ -1213,7 +1230,7 @@ function renderSymChips() {
   symPick.setOptions(names.map(n => [n, n]));
   syncSymChips();
 }
-const syncSymChips = () => symPick.set(rowNames('#symList .sym', '.s-name'));
+const syncSymChips = () => { symPick.set(rowNames('#symList .sym', '.s-name')); updateFormCounts(); };
 const continuousMeds = () => String(profile.continuous || '').split(/[,;\n]/).map(s => s.trim()).filter(Boolean);
 function renderMedChips() {
   const cont = continuousMeds();
@@ -1222,7 +1239,7 @@ function renderMedChips() {
   $('#addContinuous').hidden = cont.length < 2;
   syncMedChips();
 }
-const syncMedChips = () => medPick.set(rowNames('#medList .med', '.m-name'));
+const syncMedChips = () => { medPick.set(rowNames('#medList .med', '.m-name')); updateFormCounts(); };
 const nowTime = () => { const d = new Date(); return `${z(d.getHours())}:${z(d.getMinutes())}`; };
 // Dose usada da última vez com esse remédio.
 const lastDose = name => entries.flatMap(e => e.meds).find(m => norm(m.name) === norm(name))?.dose || '';
@@ -1303,35 +1320,38 @@ const examFiles = filePicker('#xFileList');
 const parseNum = s => { const t = String(s ?? '').trim().replace(',', '.'); return t === '' ? null : Number(t); };
 const fmtNum = v => Number(v).toLocaleString('pt-BR', {maximumFractionDigits: 1});
 const VITAL_INPUTS = [
-  // chave, campo, nome, mínimo, máximo
-  ['sys', '#vSys', 'Pressão sistólica', 50, 260],
-  ['dia', '#vDia', 'Pressão diastólica', 30, 160],
-  ['pulse', '#vPulse', 'Pulso', 25, 250],
-  ['weight', '#vWeight', 'Peso', 1, 400],
-  ['glucose', '#vGlu', 'Glicemia', 20, 900],
-  ['temp', '#vTemp', 'Temperatura', 30, 45],
-  ['spo2', '#vSpo2', 'Saturação', 50, 100]
+  // chave, nome, mínimo, máximo
+  ['sys', 'Pressão sistólica', 50, 260],
+  ['dia', 'Pressão diastólica', 30, 160],
+  ['pulse', 'Pulso', 25, 250],
+  ['weight', 'Peso', 1, 400],
+  ['glucose', 'Glicemia', 20, 900],
+  ['temp', 'Temperatura', 30, 45],
+  ['spo2', 'Saturação', 50, 100]
 ];
-function readVitals() {
+// Os campos de medição são achados pela chave (data-v) dentro de cada bloco: o do diário ou os da aba Medições.
+const vitalField = (root, k) => root.querySelector(`[data-v="${k}"]`);
+function readVitals(root = $('#vitBox'), prefix = '') {
   const v = {};
-  for (const [k, sel, label, min, max] of VITAL_INPUTS) {
-    const n = parseNum($(sel).value);
+  for (const [k, label, min, max] of VITAL_INPUTS) {
+    const n = parseNum(vitalField(root, k).value);
     if (n == null) continue;
-    if (!Number.isFinite(n) || n < min || n > max) throw new Error(`${label}: valor fora do esperado (${min} a ${max}).`);
+    if (!Number.isFinite(n) || n < min || n > max) throw new Error(`${prefix}${label}: valor fora do esperado (${min} a ${max}).`);
     v[k] = n;
   }
-  if ((v.sys == null) !== (v.dia == null)) throw new Error('Preencha as duas medidas da pressão (ex.: 120 / 80).');
-  if (v.sys != null && v.sys <= v.dia) throw new Error('A pressão sistólica (primeiro número) deve ser maior que a diastólica.');
+  if ((v.sys == null) !== (v.dia == null)) throw new Error(prefix + 'Preencha as duas medidas da pressão (ex.: 120 / 80).');
+  if (v.sys != null && v.sys <= v.dia) throw new Error(prefix + 'A pressão sistólica (primeiro número) deve ser maior que a diastólica.');
   if (!Object.keys(v).length) return null;
-  if (v.glucose != null && $('#vGluCtx').value) v.glucoseCtx = $('#vGluCtx').value;
-  if ($('#vTime').value) v.time = $('#vTime').value;
+  if (v.glucose != null && vitalField(root, 'glucoseCtx').value) v.glucoseCtx = vitalField(root, 'glucoseCtx').value;
+  if (vitalField(root, 'time').value) v.time = vitalField(root, 'time').value;
   return v;
 }
-function fillVitals(v) {
-  VITAL_INPUTS.forEach(([k, sel]) => $(sel).value = v?.[k] != null ? fmtNum(v[k]) : '');
-  $('#vGluCtx').value = v?.glucoseCtx || '';
-  $('#vTime').value = v?.time || '';
-  $('#vitBox').open = !!v;
+function fillVitals(v, root = $('#vitBox')) {
+  VITAL_INPUTS.forEach(([k]) => vitalField(root, k).value = v?.[k] != null ? fmtNum(v[k]) : '');
+  vitalField(root, 'glucoseCtx').value = v?.glucoseCtx || '';
+  vitalField(root, 'time').value = v?.time || '';
+  if (root.id !== 'vitBox') return;
+  root.open = !!v;
   updateFormCounts();
 }
 // Lista legível das medições: [rótulo, valor]
@@ -1387,8 +1407,11 @@ function updateFormCounts() {
   const n = Object.keys(marks || {}).length + events.length;
   $('#marksCnt').textContent = n ? `${n} ${n === 1 ? 'marcado' : 'marcados'}` : '';
   $('#mensCnt').textContent = mens ? 'marcado' : '';
-  const v = VITAL_INPUTS.filter(([, sel]) => $(sel).value.trim()).length;
+  const v = VITAL_INPUTS.filter(([k]) => vitalField($('#vitBox'), k).value.trim()).length;
   $('#vitCnt').textContent = v ? `${v} ${v === 1 ? 'valor' : 'valores'}` : '';
+  const ns = $$('#symList .sym').length, nm = $$('#medList .med').length;
+  $('#symCnt').textContent = ns ? `${ns} ${ns === 1 ? 'sintoma' : 'sintomas'}` : '';
+  $('#medCnt').textContent = nm ? `${nm} ${nm === 1 ? 'remédio' : 'remédios'}` : '';
 }
 // Junta os dias com menstruação em períodos {from, last, ended, flow, signs}.
 function mensPeriods(skipId) {
@@ -1456,6 +1479,7 @@ function resetForm() {
   entryFiles.reset();
   $('#fDate').value = isoLocal();
   $('#symList').innerHTML = ''; $('#medList').innerHTML = '';
+  $('#symBox').open = false; $('#medBox').open = false;
   syncSymChips(); syncMedChips();
   $('#fNotes').value = '';
   fillVitals(null);
@@ -1475,6 +1499,7 @@ function startEdit(id) {
   e.symptoms.forEach(s => addSymRow(s.name, s.intensity));
   e.meds.forEach(m => addMedRow(m.name, m.dose, m.time));
   syncSymChips(); syncMedChips();
+  $('#symBox').open = !!e.symptoms.length; $('#medBox').open = !!e.meds.length;
   $('#fNotes').value = e.notes || '';
   fillVitals(e.vitals);
   fillDayMarks(e);
@@ -1763,7 +1788,7 @@ const VITALS = [
   {title:'Saturação de oxigênio', short:'Sat. O₂', unit:'%', has: v => v.spo2 != null, fmt: v => fmtNum(v.spo2), lines:[['spo2', 'Saturação', 0]]}
 ];
 // Registros com medições em ordem cronológica: {d, t, v}
-const vitalRecords = list => list.filter(e => e.vitals).map(e => ({d: e.date, t: e.vitals.time || '', v: e.vitals, c: e.createdAt}))
+const vitalRecords = list => list.filter(e => e.vitals).map(e => ({id: e.id, d: e.date, t: e.vitals.time || '', v: e.vitals, c: e.createdAt}))
   .sort((a, b) => a.d.localeCompare(b.d) || a.t.localeCompare(b.t) || a.c - b.c);
 function vitalCharts(recs, from, to, colors, grid, text, cls) {
   let h = '';
@@ -1775,16 +1800,17 @@ function vitalCharts(recs, from, to, colors, grid, text, cls) {
   });
   return h;
 }
-function vitalsTable(recs, cls) {
-  return `<div class="tscroll r-scroll"><table class="${cls}"><thead><tr><th>Data</th><th>Hora</th>${VITALS.map(m => `<th class="n">${esc(m.short)}</th>`).join('')}</tr></thead><tbody>` +
-    recs.map(r => `<tr><td class="nw">${brShort(r.d)}</td><td>${esc(r.t) || '—'}</td>${VITALS.map(m => `<td class="n">${m.has(r.v) ? m.fmt(r.v) + (m.short === 'Glicemia' && r.v.glucoseCtx ? ` <small>${esc(r.v.glucoseCtx)}</small>` : '') : '—'}</td>`).join('')}</tr>`).join('') +
+function vitalsTable(recs, cls, actions = false) {
+  return `<div class="tscroll r-scroll"><table class="${cls}"><thead><tr><th>Data</th><th>Hora</th>${VITALS.map(m => `<th class="n">${esc(m.short)}</th>`).join('')}${actions ? '<th><span class="vh">Ações</span></th>' : ''}</tr></thead><tbody>` +
+    recs.map(r => `<tr><td class="nw">${brShort(r.d)}</td><td>${esc(r.t) || '—'}</td>${VITALS.map(m => `<td class="n">${m.has(r.v) ? m.fmt(r.v) + (m.short === 'Glicemia' && r.v.glucoseCtx ? ` <small>${esc(r.v.glucoseCtx)}</small>` : '') : '—'}</td>`).join('')}` +
+      (actions ? `<td class="acts"><button class="btn link" type="button" data-vedit="${esc(r.id)}">Editar</button><button class="btn link" type="button" data-vdel="${esc(r.id)}" style="color:var(--danger)">Excluir</button></td>` : '') + `</tr>`).join('') +
     `</tbody></table></div>`;
 }
 function renderVitals() {
   const box = $('#vitalsView');
   const all = vitalRecords(entries);
   if (!all.length) {
-    box.innerHTML = `<div class="empty">Nenhuma medição ainda. Toque em “Nova medição” para registrar pressão, peso, glicemia, temperatura ou saturação.</div>`;
+    box.innerHTML = `<div class="empty">Nenhuma medição ainda. Preencha o formulário acima para registrar pressão, peso, glicemia, temperatura ou saturação.</div>`;
     return;
   }
   let h = '<div class="vcards">';
@@ -1799,8 +1825,90 @@ function renderVitals() {
   const recs = all.filter(r => r.d >= from && r.d <= lastDay);
   const charts = vitalCharts(recs, from, lastDay, ['var(--accent)', 'var(--danger)'], 'var(--line)', 'var(--muted)', 'chart');
   h += charts || `<div class="empty" style="margin-bottom:12px">Nenhuma medição neste período.</div>`;
-  if (recs.length) h += `<h3 style="margin:18px 0 8px">Todas as medições do período</h3>` + vitalsTable([...recs].reverse(), 'tbl');
+  if (recs.length) h += `<h3 style="margin:18px 0 8px">Todas as medições do período</h3>` + vitalsTable([...recs].reverse(), 'tbl', true);
   box.innerHTML = h;
+}
+// Formulário da aba Medições: um bloco por medição (o modelo é o mesmo bloco de campos do diário).
+let editingVitalId = null;
+function addVitalBlock(v = null) {
+  const b = document.createElement('div');
+  b.className = 'vblock';
+  const g = $('#vitBox .vgrid').cloneNode(true);
+  g.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+  g.querySelectorAll('[aria-describedby]').forEach(el => el.removeAttribute('aria-describedby'));
+  b.innerHTML = `<div class="vb-head"><strong></strong><button type="button" class="x" aria-label="Tirar esta medição">×</button></div>`;
+  b.appendChild(g);
+  fillVitals(v, b);
+  if (!v) vitalField(b, 'time').value = nowTime();
+  b.querySelector('.x').addEventListener('click', () => { b.remove(); numberVitalBlocks(); });
+  $('#vfList').appendChild(b);
+  numberVitalBlocks();
+  return b;
+}
+function numberVitalBlocks() {
+  const bs = $$('#vfList .vblock');
+  bs.forEach((b, i) => { b.querySelector('.vb-head strong').textContent = bs.length > 1 ? `Medição ${i + 1}` : 'Medição'; b.querySelector('.x').hidden = bs.length < 2; });
+  $('#vfSave').textContent = editingVitalId ? 'Salvar alterações' : bs.length > 1 ? `Salvar ${bs.length} medições` : 'Salvar medição';
+}
+function resetVitalForm() {
+  editingVitalId = null;
+  $('#vfDate').value = isoLocal();
+  $('#vfList').innerHTML = '';
+  addVitalBlock();
+  $('#vitTitle').textContent = 'Nova medição';
+  $('#vfCancel').hidden = true; $('#vfAdd').hidden = false;
+  numberVitalBlocks();
+}
+function startVitalEdit(id) {
+  const e = entries.find(x => x.id === id);
+  if (!e?.vitals) return;
+  editingVitalId = id;
+  $('#vfDate').value = e.date;
+  $('#vfList').innerHTML = '';
+  addVitalBlock(e.vitals);
+  $('#vitTitle').textContent = 'Editando medição';
+  $('#vfCancel').hidden = false; $('#vfAdd').hidden = true;
+  numberVitalBlocks();
+  scrollToEl($('#vitCard'));
+}
+async function saveVitals() {
+  const date = $('#vfDate').value;
+  if (!date) return toast('Escolha a data da medição.', true);
+  const blocks = $$('#vfList .vblock');
+  let list;
+  try { list = blocks.map((b, i) => readVitals(b, blocks.length > 1 ? `Medição ${i + 1}: ` : '')); } catch (err) { return toast(err.message, true); }
+  const filled = list.filter(Boolean);
+  if (!filled.length && !editingVitalId) return toast('Preencha pelo menos um valor (pressão, peso, glicemia…).', true);
+  const btn = $('#vfSave'); btn.disabled = true;
+  try {
+    const now = Date.now();
+    if (editingVitalId) {
+      const old = entries.find(x => x.id === editingVitalId);
+      const {vitals, ...rest} = old;
+      const entry = filled[0] ? {...old, date, vitals: filled[0], updatedAt: now} : {...rest, date, updatedAt: now};
+      const empty = !entry.vitals && !entry.symptoms.length && !entry.meds.length && !entry.notes && !entry.marks && !entry.events?.length && !entry.mens && !entry.files?.length;
+      await writeTx(es => empty ? es.delete(old.id) : es.put(entry));
+      toast('Medição atualizada.');
+    } else {
+      // Cada medição vira um registro próprio, com o seu horário.
+      await writeTx(es => filled.forEach((v, i) => es.put({id: uid(), date, symptoms: [], meds: [], notes: '', files: [], vitals: v, auto: 'medicao', createdAt: now + i, updatedAt: now + i})));
+      toast(filled.length > 1 ? `${filled.length} medições salvas.` : 'Medição salva.');
+    }
+    resetVitalForm();
+    await reload();
+  } catch (err) {
+    console.error(err); saveError(err);
+  } finally { btn.disabled = false; }
+}
+async function deleteVital(id) {
+  const e = entries.find(x => x.id === id);
+  if (!e?.vitals || !confirm(`Excluir a medição de ${brDate(e.date)}${e.vitals.time ? ' às ' + e.vitals.time : ''}?`)) return;
+  const {vitals, ...rest} = e;
+  const onlyVitals = !e.symptoms.length && !e.meds.length && !e.notes && !e.marks && !e.events?.length && !e.mens && !e.files?.length;
+  await writeTx(es => onlyVitals ? es.delete(id) : es.put({...rest, updatedAt: Date.now()}));
+  if (editingVitalId === id) resetVitalForm();
+  toast('Medição excluída.');
+  reload();
 }
 
 /* ---------- Exames ---------- */
@@ -2445,6 +2553,7 @@ function reassessPain() {
   const rows = rowsByName('#symList .sym', '.s-name');
   syms.forEach(s => { if (!rows.has(norm(s.name))) addSymRow(s.name, s.intensity); });
   syncSymChips();
+  $('#symBox').open = true;
   scrollToEl($('#formCard'));
   toast(syms.length ? 'Ajuste a intensidade de cada sintoma agora e toque em “Salvar registro”.' : 'Nenhum sintoma marcado hoje ainda.');
 }
@@ -3473,7 +3582,7 @@ function bind() {
   flowGroup = chipGroup($('#mensFlow'), FLOWS, {onChange: v => { onFlowChange(v); updateFormCounts(); }});
   edgeGroup = chipGroup($('#mensEdge'), MENS_EDGES, {multi: true, onChange: updateFormCounts});
   signGroup = chipGroup($('#mensSigns'), MENS_SIGNS, {multi: true, onChange: updateFormCounts});
-  VITAL_INPUTS.forEach(([, sel]) => $(sel).addEventListener('input', updateFormCounts));
+  VITAL_INPUTS.forEach(([k]) => vitalField($('#vitBox'), k).addEventListener('input', updateFormCounts));
   xStatusGroup = chipGroup($('#xStatus'), EXAM_STATUS);
   // Sintomas e remédios: escolher na lista acrescenta uma linha abaixo; escolher de novo tira.
   symPick = chipGroup($('#symChips'), [], {multi: true, allowNew: true, tags: false, placeholder: 'Escolha ou digite o sintoma',
@@ -3535,11 +3644,13 @@ function bind() {
     showTab(n.dataset.tab); n.focus();
   });
   $('#vPeriod').addEventListener('change', renderVitals);
-  $('#btnNewVital').addEventListener('click', () => {
-    showTab('diary');
-    $('#vitBox').open = true;
-    $('#formCard').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'});
-    $('#vSys').focus({preventScroll: true});
+  $('#vfAdd').addEventListener('click', () => { const b = addVitalBlock(); vitalField(b, 'sys').focus(); });
+  $('#vfSave').addEventListener('click', saveVitals);
+  $('#vfCancel').addEventListener('click', resetVitalForm);
+  $('#vitalsView').addEventListener('click', e => {
+    const t = e.target.closest('button'); if (!t) return;
+    if (t.dataset.vedit) startVitalEdit(t.dataset.vedit);
+    else if (t.dataset.vdel) deleteVital(t.dataset.vdel);
   });
   $('#btnSave').addEventListener('click', saveEntry);
   $('#btnCancelEdit').addEventListener('click', resetForm);
@@ -3616,6 +3727,7 @@ async function init() {
   resetExamForm();
   resetRxForm();
   resetApForm();
+  resetVitalForm();
   if (!window.indexedDB) {
     $('#summary').textContent = 'Este navegador não permite salvar dados localmente (talvez esteja em modo anônimo).';
     return;

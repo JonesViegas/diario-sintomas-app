@@ -1,7 +1,7 @@
 /* Service worker do Diário de sintomas.
    Guarda só os arquivos do app para funcionar sem internet.
    Os dados do paciente ficam no IndexedDB e nunca passam por aqui. */
-const VERSION = 'v8';
+const VERSION = 'v9';
 const CACHE = 'diario-sintomas-' + VERSION;
 const SHELL = [
   './',
