@@ -1226,7 +1226,9 @@ function frequentNames(names, base = [], max = 24) {
 const rowsByName = (sel, cls) => new Map($$(sel).map(r => [norm(r.querySelector(cls).value.trim()), r]));
 const rowNames = (sel, cls) => $$(sel).map(r => r.querySelector(cls).value.trim()).filter(Boolean);
 function renderSymChips() {
-  const names = frequentNames(entries.flatMap(e => e.symptoms.map(s => s.name)), COMMON_SYMPTOMS, 200);
+  // Lista em ordem alfabética (os já usados entram junto com os da lista base).
+  const names = frequentNames(entries.flatMap(e => e.symptoms.map(s => s.name)), COMMON_SYMPTOMS, 200)
+    .sort((a, b) => a.localeCompare(b, 'pt-BR', {sensitivity: 'base'}));
   symPick.setOptions(names.map(n => [n, n]));
   syncSymChips();
 }
